@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Progress Cetakan Tahunan</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -58,13 +58,20 @@
       max-width: 350px;
     }
 
+    .container.pelat {
+      background-color: #fffdf3;
+    }
+    .container.blanket {
+      background-color: #f3f8ff;
+    }
+
     label {
       font-weight: bold;
       display: block;
       margin-top: 5px;
     }
 
-    input[type=number] {
+    input[type=number], input[type=date] {
       width: 100%;
       padding: 8px;
       margin: 6px 0;
@@ -112,18 +119,17 @@
       justify-content: center;
       align-items: center;
     }
-.container.pelat {
-  background-color: #fffdf3;
-}
-.container.blanket {
-  background-color: #f3f8ff;
-}
-
 
     canvas {
       width: 100%;
       max-width: 220px;
       height: auto;
+    }
+
+    .replacement-date {
+      margin-top: 10px;
+      font-style: italic;
+      color: #555;
     }
 
     @media (max-width: 600px) {
@@ -150,9 +156,9 @@
 
   <!-- 🔹 Navbar -->
   <div class="navbar">
-    <img src="Peruri.jpeg" alt="Logo Kiri" id="logoLeft">
+    <img src="Peruri.jpeg" alt="Logo Kiri" id="logoLeft" />
     <h1>Monitoring Suri Cetak Offset</h1>
-    <img src="IAKA.jpg" alt="Logo Kanan" id="logoRight">
+    <img src="IAKA.jpg" alt="Logo Kanan" id="logoRight" />
   </div>
 
   <!-- 🔹 Cards -->
@@ -162,8 +168,11 @@
         "Suri Pelat 1", "Suri Pelat 2", "Suri Pelat 3", "Suri Pelat 4", "Suri Pelat 5", "Suri Pelat 6", "Suri Pelat 7",
         "Suri Pelat 8", "Suri Blanket 1", "Suri Blanket 2", "Suri Blanket 3", "Suri Blanket 4", "Suri Blanket 5", "Suri Blanket 6"
       ];
-       for (let i = 1; i <= 14; i++) {
+      for (let i = 1; i <= 14; i++) {
         let typeClass = i <= 8 ? 'pelat' : 'blanket';
+        // Tentukan label untuk tanggal penggantian sesuai jenis pelat atau blanket
+        let replacementLabel = typeClass === 'pelat' ? 'Tanggal Penggantian Pelat' : 'Tanggal Penggantian Blanket';
+
         document.write(`
           <div class="container ${typeClass}">
             <h2>Target ${cardNames[i - 1]}</h2>
@@ -179,7 +188,11 @@
               <button onclick="resetData(${i})">Reset Grafik</button>
             </div>
 
-           
+            <label for="replacementDate${i}">${replacementLabel}</label>
+            <input type="date" id="replacementDate${i}" />
+            <button onclick="simpanTanggal(${i})">Simpan Tanggal Penggantian</button>
+            <div class="replacement-date" id="displayTanggal${i}">Belum ada tanggal penggantian disimpan</div>
+
             <h3>Total Cetakan: <span id="totalCetakan${i}">0</span></h3>
             <h3>Pencapaian: <span id="persentase${i}">0%</span></h3>
 
@@ -196,13 +209,19 @@
     let dataCetakan = {};
     let targetCetakan = {};
     let charts = {};
+    let tanggalPenggantian = {};
 
+    // Load dari localStorage jika ada
     if (localStorage.getItem("dataCetakan")) {
       dataCetakan = JSON.parse(localStorage.getItem("dataCetakan"));
     }
 
     if (localStorage.getItem("targetCetakan")) {
       targetCetakan = JSON.parse(localStorage.getItem("targetCetakan"));
+    }
+
+    if (localStorage.getItem("tanggalPenggantian")) {
+      tanggalPenggantian = JSON.parse(localStorage.getItem("tanggalPenggantian"));
     }
 
     function initChart(id) {
@@ -227,25 +246,30 @@
       });
     }
 
-   function renderData(id) {
-  let total = (dataCetakan[id] || []).reduce((a, b) => a + b, 0);
-  let target = targetCetakan[id] || 0;
-  let persen = target > 0 ? ((total / target) * 100).toFixed(2) : 0;
+    function renderData(id) {
+      let total = (dataCetakan[id] || []).reduce((a, b) => a + b, 0);
+      let target = targetCetakan[id] || 0;
+      let persen = target > 0 ? ((total / target) * 100).toFixed(2) : 0;
 
-  document.getElementById("totalCetakan" + id).innerText = total;
-  document.getElementById("persentase" + id).innerText = persen + "%";
+      document.getElementById("totalCetakan" + id).innerText = total;
+      document.getElementById("persentase" + id).innerText = persen + "%";
 
-  document.getElementById("persentase"+id).innerText=persen+"%";
+      let progress = Math.min(persen, 100);
+      charts[id].data.datasets[0].data = [progress, 100 - progress];
+      charts[id].update();
 
-  let progress = Math.min(persen, 100);
-  charts[id].data.datasets[0].data = [progress, 100 - progress];
-  charts[id].update();
+      if (targetCetakan[id]) {
+        document.getElementById("target" + id).value = targetCetakan[id];
+      }
 
-  if (targetCetakan[id]) {
-    document.getElementById("target" + id).value = targetCetakan[id];
-  }
-}
-
+      // Tampilkan tanggal penggantian jika ada
+      if (tanggalPenggantian[id]) {
+        document.getElementById("replacementDate" + id).value = tanggalPenggantian[id];
+        document.getElementById("displayTanggal" + id).innerText = "Tanggal Penggantian terakhir: " + tanggalPenggantian[id];
+      } else {
+        document.getElementById("displayTanggal" + id).innerText = "Belum ada tanggal penggantian disimpan";
+      }
+    }
 
     function simpanTarget(id) {
       let newTarget = parseInt(document.getElementById("target" + id).value);
@@ -285,6 +309,17 @@
         localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
         renderData(id);
       }
+    }
+
+    function simpanTanggal(id) {
+      let tanggal = document.getElementById("replacementDate" + id).value;
+      if (!tanggal) {
+        alert("Pilih tanggal penggantian yang valid!");
+        return;
+      }
+      tanggalPenggantian[id] = tanggal;
+      localStorage.setItem("tanggalPenggantian", JSON.stringify(tanggalPenggantian));
+      renderData(id);
     }
 
     function idToName(id) {
