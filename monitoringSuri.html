@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress Cetakan Tahunan</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    .navbar {
+      background: #ff6600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar img {
+      height: 40px;
+      cursor: pointer;
+    }
+
+    .navbar h1 {
+      color: white;
+      margin: 0;
+      font-size: 18px;
+      text-align: center;
+      flex: 1;
+    }
+
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+      justify-content: center;
+    }
+
+    .container {
+      flex: 1 1 300px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 350px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 5px;
+    }
+
+    input[type=number] {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background: #ff6600;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 5px;
+      margin-right: 5px;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #e65c00;
+    }
+
+    .progress {
+      margin-top: 10px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 20px;
+      background: #ff6600;
+      width: 0%;
+      text-align: center;
+      color: white;
+      line-height: 20px;
+      transition: width 0.5s;
+    }
+
+    .chart-container {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+.container.pelat {
+  background-color: #fffdf3;
+}
+.container.blanket {
+  background-color: #f3f8ff;
+}
+
+
+    canvas {
+      width: 100%;
+      max-width: 220px;
+      height: auto;
+    }
+
+    @media (max-width: 600px) {
+      .navbar h1 {
+        font-size: 16px;
+      }
+
+      .container {
+        flex: 1 1 100%;
+      }
+
+      .cards {
+        padding: 10px;
+      }
+
+      button {
+        font-size: 13px;
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔹 Navbar -->
+  <div class="navbar">
+    <img src="Peruri.jpeg" alt="Logo Kiri" id="logoLeft">
+    <h1>Monitoring Suri Cetak Offset</h1>
+    <img src="IAKA.jpg" alt="Logo Kanan" id="logoRight">
+  </div>
+
+  <!-- 🔹 Cards -->
+  <div class="cards">
+    <script>
+      let cardNames = [
+        "Suri Pelat 1", "Suri Pelat 2", "Suri Pelat 3", "Suri Pelat 4", "Suri Pelat 5", "Suri Pelat 6", "Suri Pelat 7",
+        "Suri Pelat 8", "Suri Blanket 1", "Suri Blanket 2", "Suri Blanket 3", "Suri Blanket 4", "Suri Blanket 5", "Suri Blanket 6"
+      ];
+       for (let i = 1; i <= 14; i++) {
+        let typeClass = i <= 8 ? 'pelat' : 'blanket';
+        document.write(`
+          <div class="container ${typeClass}">
+            <h2>Target ${cardNames[i - 1]}</h2>
+
+            <label>Target Cetakan</label>
+            <input type="number" id="target${i}" placeholder="Masukkan target cetakan" />
+            <button onclick="simpanTarget(${i})">Simpan Target</button>
+
+            <label>Input Cetakan Hari Ini</label>
+            <input type="number" id="inputCetakan${i}" placeholder="Masukkan jumlah cetakan" />
+            <div>
+              <button onclick="tambahData(${i})">Tambah Data</button>
+              <button onclick="resetData(${i})">Reset Grafik</button>
+            </div>
+
+           
+            <h3>Total Cetakan: <span id="totalCetakan${i}">0</span></h3>
+            <h3>Pencapaian: <span id="persentase${i}">0%</span></h3>
+
+            <div class="chart-container">
+              <canvas id="pieChart${i}"></canvas>
+            </div>
+          </div>
+        `);
+      }
+    </script>
+  </div>
+
+  <script>
+    let dataCetakan = {};
+    let targetCetakan = {};
+    let charts = {};
+
+    if (localStorage.getItem("dataCetakan")) {
+      dataCetakan = JSON.parse(localStorage.getItem("dataCetakan"));
+    }
+
+    if (localStorage.getItem("targetCetakan")) {
+      targetCetakan = JSON.parse(localStorage.getItem("targetCetakan"));
+    }
+
+    function initChart(id) {
+      let ctx = document.getElementById("pieChart" + id).getContext("2d");
+      charts[id] = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Tercapai", "Sisa"],
+          datasets: [{
+            data: [0, 100],
+            backgroundColor: ["#ff6600", "#ddd"]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom"
+            }
+          }
+        }
+      });
+    }
+
+   function renderData(id) {
+  let total = (dataCetakan[id] || []).reduce((a, b) => a + b, 0);
+  let target = targetCetakan[id] || 0;
+  let persen = target > 0 ? ((total / target) * 100).toFixed(2) : 0;
+
+  document.getElementById("totalCetakan" + id).innerText = total;
+  document.getElementById("persentase" + id).innerText = persen + "%";
+
+  document.getElementById("persentase"+id).innerText=persen+"%";
+
+  let progress = Math.min(persen, 100);
+  charts[id].data.datasets[0].data = [progress, 100 - progress];
+  charts[id].update();
+
+  if (targetCetakan[id]) {
+    document.getElementById("target" + id).value = targetCetakan[id];
+  }
+}
+
+
+    function simpanTarget(id) {
+      let newTarget = parseInt(document.getElementById("target" + id).value);
+      if (!newTarget || newTarget <= 0) {
+        alert("Masukkan target valid!");
+        return;
+      }
+      targetCetakan[id] = newTarget;
+      localStorage.setItem("targetCetakan", JSON.stringify(targetCetakan));
+      renderData(id);
+    }
+
+    function tambahData(id) {
+      let input = parseInt(document.getElementById("inputCetakan" + id).value);
+      if (!input || input <= 0) {
+        alert("Masukkan jumlah cetakan valid!");
+        return;
+      }
+      if (!dataCetakan[id]) dataCetakan[id] = [];
+      dataCetakan[id].push(input);
+      document.getElementById("inputCetakan" + id).value = "";
+
+      localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
+      renderData(id);
+
+      let total = dataCetakan[id].reduce((a, b) => a + b, 0);
+      let target = targetCetakan[id] || 0;
+      let persen = target > 0 ? (total / target) * 100 : 0;
+      if (persen >= 95) {
+        alert(`⚠️ Peringatan: Pencapaian ${persen.toFixed(2)}% pada ${idToName(id)}!`);
+      }
+    }
+
+    function resetData(id) {
+      if (confirm("Apakah Anda yakin ingin mereset data cetakan ini?")) {
+        dataCetakan[id] = [];
+        localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
+        renderData(id);
+      }
+    }
+
+    function idToName(id) {
+      const names = [
+        "Suri Pelat 1", "Suri Pelat 2", "Suri Pelat 3", "Suri Pelat 4", "Suri Pelat 5", "Suri Pelat 6", "Suri Pelat 7",
+        "Suri Pelat 8", "Suri Blanket 1", "Suri Blanket 2", "Suri Blanket 3", "Suri Blanket 4", "Suri Blanket 5", "Suri Blanket 6"
+      ];
+      return names[id - 1] || `Mesin ${id}`;
+    }
+
+    for (let i = 1; i <= 14; i++) {
+      initChart(i);
+      renderData(i);
+    }
+  </script>
+</body>
+</html>
