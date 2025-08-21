@@ -131,6 +131,16 @@
       font-style: italic;
       color: #555;
     }
+	.warning {
+  	margin-top: 10px;
+  	background: #ffe0cc;
+  	color: #b34700;
+  	padding: 8px;
+  	border-radius: 5px;
+  	font-weight: bold;
+  	display: none; /* default disembunyikan */
+    }
+
 
     @media (max-width: 600px) {
       .navbar h1 {
@@ -192,6 +202,8 @@
             <input type="date" id="replacementDate${i}" />
             <button onclick="simpanTanggal(${i})">Simpan Tanggal Penggantian</button>
             <div class="replacement-date" id="displayTanggal${i}">Belum ada tanggal penggantian disimpan</div>
+
+	    <div class="warning" id="warning${i}"></div>
 
             <h3>Total Cetakan: <span id="totalCetakan${i}">0</span></h3>
             <h3>Pencapaian: <span id="persentase${i}">0%</span></h3>
@@ -269,7 +281,16 @@
       } else {
         document.getElementById("displayTanggal" + id).innerText = "Belum ada tanggal penggantian disimpan";
       }
+let warningBox = document.getElementById("warning" + id);
+if (persen >= 95) {
+  warningBox.style.display = "block";
+  warningBox.innerText = `⚠️ Peringatan: Pencapaian Suri sudah ${persen}%!`;
+} else {
+  warningBox.style.display = "none";
+}
+
     }
+
 
     function simpanTarget(id) {
       let newTarget = parseInt(document.getElementById("target" + id).value);
@@ -282,26 +303,33 @@
       renderData(id);
     }
 
-    function tambahData(id) {
-      let input = parseInt(document.getElementById("inputCetakan" + id).value);
-      if (!input || input <= 0) {
-        alert("Masukkan jumlah cetakan valid!");
-        return;
-      }
-      if (!dataCetakan[id]) dataCetakan[id] = [];
-      dataCetakan[id].push(input);
-      document.getElementById("inputCetakan" + id).value = "";
+function tambahData(id) {
+  let input = parseInt(document.getElementById("inputCetakan" + id).value);
+  if (!input || input <= 0) {
+    alert("Masukkan jumlah cetakan valid!");
+    return;
+  }
 
-      localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
-      renderData(id);
+  if (!dataCetakan[id]) dataCetakan[id] = [];
+  dataCetakan[id].push(input);
+  document.getElementById("inputCetakan" + id).value = "";
 
-      let total = dataCetakan[id].reduce((a, b) => a + b, 0);
-      let target = targetCetakan[id] || 0;
-      let persen = target > 0 ? (total / target) * 100 : 0;
-      if (persen >= 95) {
-        alert(`⚠️ Peringatan: Pencapaian ${persen.toFixed(2)}% pada ${idToName(id)}!`);
-      }
-    }
+  localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
+  renderData(id);
+
+  let total = dataCetakan[id].reduce((a, b) => a + b, 0);
+  let target = targetCetakan[id] || 0;
+  let persen = target > 0 ? (total / target) * 100 : 0;
+
+  let warningBox = document.getElementById("warning" + id);
+  if (persen >= 95) {
+    warningBox.style.display = "block";
+    warningBox.innerText = `⚠️ Peringatan: Pencapaian Suri Sudah ${persen.toFixed(2)}%!`;
+  } else {
+    warningBox.style.display = "none";
+  }
+}
+
 
     function resetData(id) {
       if (confirm("Apakah Anda yakin ingin mereset data cetakan ini?")) {
@@ -337,4 +365,3 @@
   </script>
 </body>
 </html>
-
