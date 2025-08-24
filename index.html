@@ -1,202 +1,289 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monitoring Suri Offset</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f9f9f9;
-      color: #333;
-    }
-
-    .navbar {
-      background: #ff6600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .navbar img {
-      height: 40px;
-      cursor: pointer;
-    }
-
-    .navbar h1 {
-      color: white;
-      margin: 0;
-      font-size: 18px;
-      text-align: center;
-      flex: 1;
-    }
-
-    .cards {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 20px;
-      justify-content: center;
-    }
-
-    .container {
-      flex: 1 1 300px;
-      background: #fff;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      max-width: 350px;
-    }
-
-    .container.pelat {
-      background-color: #fffdf3;
-    }
-    .container.blanket {
-      background-color: #f3f8ff;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 5px;
-    }
-
-    input[type=number], input[type=date] {
-      width: 100%;
-      padding: 8px;
-      margin: 6px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    button {
-      background: #ff6600;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 5px;
-      margin-right: 5px;
-      font-size: 14px;
-    }
-
-    button:hover {
-      background: #e65c00;
-    }
-
-    .progress {
-      margin-top: 10px;
-      width: 100%;
-      background: #ddd;
-      border-radius: 20px;
-      overflow: hidden;
-    }
-
-    .progress-bar {
-      height: 20px;
-      background: #ff6600;
-      width: 0%;
-      text-align: center;
-      color: white;
-      line-height: 20px;
-      transition: width 0.5s;
-    }
-
-    .chart-container {
-      margin-top: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    canvas {
-      width: 100%;
-      max-width: 220px;
-      height: auto;
-    }
-
-    .replacement-date {
-      margin-top: 10px;
-      font-style: italic;
-      color: #555;
-    }
-	.warning {
-  	margin-top: 10px;
-  	background: #ffe0cc;
-  	color: #b34700;
-  	padding: 8px;
-  	border-radius: 5px;
-  	font-weight: bold;
-  	display: none; /* default disembunyikan */
-    }
-
-
-    @media (max-width: 600px) {
-      .navbar h1 {
-        font-size: 16px;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Monitoring Suri Pelat dan Blanket Cetak Offset</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
       }
 
-      .container {
-        flex: 1 1 100%;
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f9f9f9;
+        color: #333;
+      }
+
+      .navbar {
+        background: #ff6600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .navbar img {
+        height: 40px;
+        cursor: pointer;
+        margin: 0 15px;
+      }
+
+      .navbar h1 {
+        color: white;
+        margin: 0;
+        font-size: 22px;
+        text-align: center;
+        flex: 1;
+      }
+
+      .navbar h3 {
+        color: white;
       }
 
       .cards {
-        padding: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 20px;
+        justify-content: center;
+      }
+
+      .container {
+        flex: 1 1 300px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 350px;
+      }
+
+      .container.pelat {
+        background-color: #fffdf3;
+      }
+      .container.blanket {
+        background-color: #f3f8ff;
+      }
+
+      label {
+        font-weight: bold;
+        display: block;
+        margin-top: 5px;
+      }
+
+      input[type="number"],
+      input[type="date"] {
+        width: 100%;
+        padding: 8px;
+        margin: 6px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
       }
 
       button {
-        font-size: 13px;
-        padding: 6px 10px;
+        background: #ff6600;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 5px;
+        margin-right: 5px;
+        font-size: 14px;
       }
-    }
-  </style>
-</head>
-<body>
 
-  <!-- 🔹 Navbar -->
-  <div class="navbar">
-    <img src="Peruri.jpeg" alt="Logo Kiri" id="logoLeft" />
-    <h1>Monitoring Suri Cetak Offset</h1>
-    <img src="IAKA.jpg" alt="Logo Kanan" id="logoRight" />
-  </div>
+      button:hover {
+        background: #e65c00;
+      }
 
-  <!-- 🔹 Cards -->
-  <div class="cards">
-    <script>
-      let cardNames = [
-        "Suri Pelat 1", "Suri Pelat 2", "Suri Pelat 3", "Suri Pelat 4", "Suri Pelat 5", "Suri Pelat 6", "Suri Pelat 7",
-        "Suri Pelat 8", "Suri Blanket 1", "Suri Blanket 2", "Suri Blanket 3", "Suri Blanket 4", "Suri Blanket 5", "Suri Blanket 6"
-      ];
-      for (let i = 1; i <= 14; i++) {
-        let typeClass = i <= 8 ? 'pelat' : 'blanket';
-        // Tentukan label untuk tanggal penggantian sesuai jenis pelat atau blanket
-        let replacementLabel = typeClass === 'pelat' ? 'Tanggal Penggantian Pelat' : 'Tanggal Penggantian Blanket';
+      .progress {
+        margin-top: 10px;
+        width: 100%;
+        background: #ddd;
+        border-radius: 20px;
+        overflow: hidden;
+      }
 
-        document.write(`
+      .progress-bar {
+        height: 20px;
+        background: #ff6600;
+        width: 0%;
+        text-align: center;
+        color: white;
+        line-height: 20px;
+        transition: width 0.5s;
+      }
+
+      .chart-container {
+        margin-top: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      canvas {
+        width: 100%;
+        max-width: 220px;
+        height: auto;
+      }
+
+      .replacement-date {
+        margin-top: 10px;
+        font-style: italic;
+        color: #555;
+      }
+      .warning {
+        margin-top: 10px;
+        background: #ffe0cc;
+        color: #b34700;
+        padding: 8px;
+        border-radius: 5px;
+        font-weight: bold;
+        display: none; /* default disembunyikan */
+      }
+
+      .global-input-container {
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .global-input-card {
+        background: #fff;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        max-width: 600px;
+        width: 100%;
+        border: 2px solid #ff6600;
+      }
+
+      .global-input-card h2 {
+        color: #ff6600;
+        text-align: center;
+        margin-bottom: 25px;
+        font-size: 20px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      .input-group label {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      .input-group input:focus {
+        border-color: #ff6600;
+        outline: none;
+      }
+
+      @media (max-width: 600px) {
+        .navbar h1 {
+          font-size: 16px;
+        }
+
+        .container {
+          flex: 1 1 100%;
+        }
+
+        .cards {
+          padding: 10px;
+        }
+
+        button {
+          font-size: 13px;
+          padding: 6px 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 🔹 Navbar -->
+    <div class="navbar">
+      <img src="Peruri.jpeg" alt="Logo Kiri" id="logoLeft" />
+      <img src="IAKA.jpg" alt="Logo Kanan" id="logoRight" />
+      <h1>DASHBOARD MONITORING SURI PELAT DAN BLANKET CETAK OFFSET</h1>
+      <h3>TEAM CERA-CERIA</h3>
+    </div>
+
+    <!-- 🔹 Input Global -->
+    <div class="global-input-container">
+      <div class="global-input-card">
+        <h2>INPUT DATA PRODUKSI</h2>
+
+        <div class="input-group">
+          <label>Target Cetakan (Pelat dan Blanket)</label>
+          <input
+            type="number"
+            id="globalTarget"
+            placeholder="Masukkan target produksi global"
+          />
+          <button onclick="simpanTargetGlobal()">Simpan Target Global</button>
+        </div>
+
+        <div class="input-group">
+          <label>Input Hasil Produksi (Gilir)</label>
+          <input
+            type="number"
+            id="globalInput"
+            placeholder="Masukkan jumlah produksi"
+          />
+          <div style="display: flex; gap: 5px; margin-top: 5px">
+            <button onclick="tambahKeSemuaGlobal()">Tambah Semua Data</button>
+            <button onclick="resetSemuaData()">Reset Semua Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔹 Cards -->
+    <div class="cards">
+      <script>
+        let cardNames = [
+          "Suri Pelat MK 1",
+          "Suri Pelat MK 2",
+          "Suri Pelat MK 3",
+          "Suri Pelat MK 4",
+          "Suri Pelat BLK 1",
+          "Suri Pelat BLK 2",
+          "Suri Pelat BLK 3",
+          "Suri Pelat BLK 4",
+          "Suri Blanket MK 1",
+          "Suri Blanket MK 2",
+          "Suri Blanket MK 3",
+          "Suri Blanket BLK 1",
+          "Suri Blanket BLK 2",
+          "Suri Blanket BLK 3",
+        ];
+        for (let i = 1; i <= 14; i++) {
+          let typeClass = i <= 8 ? "pelat" : "blanket";
+          // Tentukan label untuk tanggal penggantian sesuai jenis pelat atau blanket
+          let replacementLabel =
+            typeClass === "pelat"
+              ? "Tanggal Penggantian Pelat"
+              : "Tanggal Penggantian Blanket";
+
+          document.write(`
           <div class="container ${typeClass}">
-            <h2>Target ${cardNames[i - 1]}</h2>
-
-            <label>Target Cetakan</label>
-            <input type="number" id="target${i}" placeholder="Masukkan target cetakan" />
-            <button onclick="simpanTarget(${i})">Simpan Target</button>
-
-            <label>Input Cetakan Hari Ini</label>
-            <input type="number" id="inputCetakan${i}" placeholder="Masukkan jumlah cetakan" />
-            <div>
-              <button onclick="tambahData(${i})">Tambah Data</button>
-              <button onclick="resetData(${i})">Reset Grafik</button>
-            </div>
+            <h2>${cardNames[i - 1]}</h2>
 
             <label for="replacementDate${i}">${replacementLabel}</label>
             <input type="date" id="replacementDate${i}" />
@@ -208,160 +295,244 @@
             <h3>Total Cetakan: <span id="totalCetakan${i}">0</span></h3>
             <h3>Pencapaian: <span id="persentase${i}">0%</span></h3>
 
+            <div style="display: flex; gap: 5px; margin: 10px 0;">
+              <button onclick="resetData(${i})">Reset Data</button>
+            </div>
+
             <div class="chart-container">
               <canvas id="pieChart${i}"></canvas>
             </div>
           </div>
         `);
-      }
-    </script>
-  </div>
-
-  <script>
-    let dataCetakan = {};
-    let targetCetakan = {};
-    let charts = {};
-    let tanggalPenggantian = {};
-
-    // Load dari localStorage jika ada
-    if (localStorage.getItem("dataCetakan")) {
-      dataCetakan = JSON.parse(localStorage.getItem("dataCetakan"));
-    }
-
-    if (localStorage.getItem("targetCetakan")) {
-      targetCetakan = JSON.parse(localStorage.getItem("targetCetakan"));
-    }
-
-    if (localStorage.getItem("tanggalPenggantian")) {
-      tanggalPenggantian = JSON.parse(localStorage.getItem("tanggalPenggantian"));
-    }
-
-    function initChart(id) {
-      let ctx = document.getElementById("pieChart" + id).getContext("2d");
-      charts[id] = new Chart(ctx, {
-        type: "doughnut",
-        data: {
-          labels: ["Tercapai", "Sisa"],
-          datasets: [{
-            data: [0, 100],
-            backgroundColor: ["#ff6600", "#ddd"]
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom"
-            }
-          }
         }
-      });
-    }
+      </script>
+    </div>
 
-    function renderData(id) {
-      let total = (dataCetakan[id] || []).reduce((a, b) => a + b, 0);
-      let target = targetCetakan[id] || 0;
-      let persen = target > 0 ? ((total / target) * 100).toFixed(2) : 0;
+    <script>
+      let dataCetakan = {};
+      let targetCetakan = {};
+      let charts = {};
+      let tanggalPenggantian = {};
 
-      document.getElementById("totalCetakan" + id).innerText = total;
-      document.getElementById("persentase" + id).innerText = persen + "%";
-
-      let progress = Math.min(persen, 100);
-      charts[id].data.datasets[0].data = [progress, 100 - progress];
-      charts[id].update();
-
-      if (targetCetakan[id]) {
-        document.getElementById("target" + id).value = targetCetakan[id];
+      // Load dari localStorage jika ada
+      if (localStorage.getItem("dataCetakan")) {
+        dataCetakan = JSON.parse(localStorage.getItem("dataCetakan"));
       }
 
-      // Tampilkan tanggal penggantian jika ada
-      if (tanggalPenggantian[id]) {
-        document.getElementById("replacementDate" + id).value = tanggalPenggantian[id];
-        document.getElementById("displayTanggal" + id).innerText = "Tanggal Penggantian terakhir: " + tanggalPenggantian[id];
-      } else {
-        document.getElementById("displayTanggal" + id).innerText = "Belum ada tanggal penggantian disimpan";
+      if (localStorage.getItem("targetCetakan")) {
+        targetCetakan = JSON.parse(localStorage.getItem("targetCetakan"));
       }
-let warningBox = document.getElementById("warning" + id);
-if (persen >= 95) {
-  warningBox.style.display = "block";
-  warningBox.innerText = `⚠️ Peringatan: Pencapaian Suri sudah ${persen}%!`;
-} else {
-  warningBox.style.display = "none";
-}
 
-    }
-
-
-    function simpanTarget(id) {
-      let newTarget = parseInt(document.getElementById("target" + id).value);
-      if (!newTarget || newTarget <= 0) {
-        alert("Masukkan target valid!");
-        return;
+      if (localStorage.getItem("tanggalPenggantian")) {
+        tanggalPenggantian = JSON.parse(
+          localStorage.getItem("tanggalPenggantian")
+        );
       }
-      targetCetakan[id] = newTarget;
-      localStorage.setItem("targetCetakan", JSON.stringify(targetCetakan));
-      renderData(id);
-    }
 
-function tambahData(id) {
-  let input = parseInt(document.getElementById("inputCetakan" + id).value);
-  if (!input || input <= 0) {
-    alert("Masukkan jumlah cetakan valid!");
-    return;
-  }
+      function initChart(id) {
+        let ctx = document.getElementById("pieChart" + id).getContext("2d");
+        charts[id] = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Tercapai", "Sisa"],
+            datasets: [
+              {
+                data: [0, 100],
+                backgroundColor: ["#ff6600", "#ddd"],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+      }
 
-  if (!dataCetakan[id]) dataCetakan[id] = [];
-  dataCetakan[id].push(input);
-  document.getElementById("inputCetakan" + id).value = "";
+      function renderData(id) {
+        let total = (dataCetakan[id] || []).reduce((a, b) => a + b, 0);
+        let target = targetCetakan[id] || 0;
+        let persen = target > 0 ? ((total / target) * 100).toFixed(2) : 0;
 
-  localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
-  renderData(id);
+        document.getElementById("totalCetakan" + id).innerText = total;
+        document.getElementById("persentase" + id).innerText = persen + "%";
 
-  let total = dataCetakan[id].reduce((a, b) => a + b, 0);
-  let target = targetCetakan[id] || 0;
-  let persen = target > 0 ? (total / target) * 100 : 0;
+        let progress = Math.min(persen, 100);
+        charts[id].data.datasets[0].data = [progress, 100 - progress];
+        charts[id].update();
 
-  let warningBox = document.getElementById("warning" + id);
-  if (persen >= 95) {
-    warningBox.style.display = "block";
-    warningBox.innerText = `⚠️ Peringatan: Pencapaian Suri Sudah ${persen.toFixed(2)}%!`;
-  } else {
-    warningBox.style.display = "none";
-  }
-}
+        // Tampilkan tanggal penggantian jika ada
+        if (tanggalPenggantian[id]) {
+          document.getElementById("replacementDate" + id).value =
+            tanggalPenggantian[id];
+          document.getElementById("displayTanggal" + id).innerText =
+            "Tanggal Penggantian terakhir: " + tanggalPenggantian[id];
+        } else {
+          document.getElementById("displayTanggal" + id).innerText =
+            "Belum ada tanggal penggantian disimpan";
+        }
+        let warningBox = document.getElementById("warning" + id);
+        if (persen >= 95) {
+          warningBox.style.display = "block";
+          warningBox.innerText = `⚠️ Peringatan: Pencapaian Suri sudah ${persen}%!`;
+        } else {
+          warningBox.style.display = "none";
+        }
+      }
 
+      function simpanTargetGlobal() {
+        let newTarget = parseInt(document.getElementById("globalTarget").value);
+        if (!newTarget || newTarget <= 0) {
+          alert("Masukkan target valid!");
+          return;
+        }
 
-    function resetData(id) {
-      if (confirm("Apakah Anda yakin ingin mereset data cetakan ini?")) {
-        dataCetakan[id] = [];
-        localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
+        // Set target yang sama untuk semua card
+        for (let i = 1; i <= 14; i++) {
+          targetCetakan[i] = newTarget;
+        }
+
+        localStorage.setItem("targetCetakan", JSON.stringify(targetCetakan));
+
+        // Render ulang semua card
+        for (let i = 1; i <= 14; i++) {
+          renderData(i);
+        }
+      }
+
+      function simpanTarget(id) {
+        let newTarget = parseInt(document.getElementById("target" + id).value);
+        if (!newTarget || newTarget <= 0) {
+          alert("Masukkan target valid!");
+          return;
+        }
+        targetCetakan[id] = newTarget;
+        localStorage.setItem("targetCetakan", JSON.stringify(targetCetakan));
         renderData(id);
       }
-    }
 
-    function simpanTanggal(id) {
-      let tanggal = document.getElementById("replacementDate" + id).value;
-      if (!tanggal) {
-        alert("Pilih tanggal penggantian yang valid!");
-        return;
+      function resetData(id) {
+        if (confirm("Apakah Anda yakin ingin mereset data cetakan ini?")) {
+          dataCetakan[id] = [];
+          localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
+          renderData(id);
+        }
       }
-      tanggalPenggantian[id] = tanggal;
-      localStorage.setItem("tanggalPenggantian", JSON.stringify(tanggalPenggantian));
-      renderData(id);
-    }
 
-    function idToName(id) {
-      const names = [
-        "Suri Pelat 1", "Suri Pelat 2", "Suri Pelat 3", "Suri Pelat 4", "Suri Pelat 5", "Suri Pelat 6", "Suri Pelat 7",
-        "Suri Pelat 8", "Suri Blanket 1", "Suri Blanket 2", "Suri Blanket 3", "Suri Blanket 4", "Suri Blanket 5", "Suri Blanket 6"
-      ];
-      return names[id - 1] || `Mesin ${id}`;
-    }
+      function resetSemuaData() {
+        if (confirm("Apakah Anda yakin ingin mereset SEMUA data cetakan?")) {
+          // Reset semua data
+          for (let i = 1; i <= 14; i++) {
+            dataCetakan[i] = [];
+          }
 
-    for (let i = 1; i <= 14; i++) {
-      initChart(i);
-      renderData(i);
-    }
-  </script>
-</body>
+          localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
+
+          // Render ulang semua card
+          for (let i = 1; i <= 14; i++) {
+            renderData(i);
+          }
+        }
+      }
+
+      function simpanTanggal(id) {
+        let tanggal = document.getElementById("replacementDate" + id).value;
+        if (!tanggal) {
+          alert("Pilih tanggal penggantian yang valid!");
+          return;
+        }
+        tanggalPenggantian[id] = tanggal;
+        localStorage.setItem(
+          "tanggalPenggantian",
+          JSON.stringify(tanggalPenggantian)
+        );
+        renderData(id);
+      }
+
+      function tambahKeSemuaGlobal() {
+        let input = parseInt(document.getElementById("globalInput").value);
+        if (!input || input <= 0) {
+          alert("Masukkan jumlah cetakan valid terlebih dahulu!");
+          return;
+        }
+
+        {
+          // Tambahkan ke semua card (1-14)
+          for (let i = 1; i <= 14; i++) {
+            if (!dataCetakan[i]) dataCetakan[i] = [];
+            dataCetakan[i].push(input);
+          }
+
+          // Update localStorage
+          localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
+
+          // Render ulang semua card
+          for (let i = 1; i <= 14; i++) {
+            renderData(i);
+          }
+
+          // Clear input field
+          document.getElementById("globalInput").value = "";
+        }
+      }
+
+      function tambahKeSemua(id) {
+        let input = parseInt(
+          document.getElementById("inputCetakan" + id).value
+        );
+        if (!input || input <= 0) {
+          alert("Masukkan jumlah cetakan valid terlebih dahulu!");
+          return;
+        }
+
+        {
+          // Tambahkan ke semua card (1-14)
+          for (let i = 1; i <= 14; i++) {
+            if (!dataCetakan[i]) dataCetakan[i] = [];
+            dataCetakan[i].push(input);
+          }
+
+          // Update localStorage
+          localStorage.setItem("dataCetakan", JSON.stringify(dataCetakan));
+
+          // Render ulang semua card
+          for (let i = 1; i <= 14; i++) {
+            renderData(i);
+          }
+
+          // Clear input field
+          document.getElementById("inputCetakan" + id).value = "";
+        }
+      }
+
+      function idToName(id) {
+        const names = [
+          "Suri Pelat 1",
+          "Suri Pelat 2",
+          "Suri Pelat 3",
+          "Suri Pelat 4",
+          "Suri Pelat 5",
+          "Suri Pelat 6",
+          "Suri Pelat 7",
+          "Suri Pelat 8",
+          "Suri Blanket 1",
+          "Suri Blanket 2",
+          "Suri Blanket 3",
+          "Suri Blanket 4",
+          "Suri Blanket 5",
+          "Suri Blanket 6",
+        ];
+        return names[id - 1] || `Mesin ${id}`;
+      }
+
+      for (let i = 1; i <= 14; i++) {
+        initChart(i);
+        renderData(i);
+      }
+    </script>
+  </body>
 </html>
